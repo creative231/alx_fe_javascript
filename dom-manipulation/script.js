@@ -116,3 +116,45 @@ function importFromJsonFile(event) {
   };
   fileReader.readAsText(event.target.files[0]);
 }
+// Function to post a new quote to the mock server (simulation)
+async function postQuoteToServer(quote) {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(quote)
+    });
+
+    const result = await response.json();
+    console.log("Quote sent to server:", result);
+    showNotification('Quote successfully sent to server (simulated)', '#28a745');
+  } catch (error) {
+    console.error("Error posting quote to server:", error);
+    showNotification('Failed to send quote to server', '#dc3545');
+  }
+}
+function addQuote() {
+  const textInput = document.getElementById('newQuoteText');
+  const categoryInput = document.getElementById('newQuoteCategory');
+  const text = textInput.value.trim();
+  const category = categoryInput.value.trim();
+
+  if (text && category) {
+    const newQuote = { text, category };
+    quotes.push(newQuote);
+    saveQuotes();
+    populateCategories();
+    showNotification('New quote added locally!', '#17a2b8');
+
+    // Post the new quote to the server (simulated)
+    postQuoteToServer(newQuote);
+
+    textInput.value = '';
+    categoryInput.value = '';
+    showRandomQuote();
+  } else {
+    showNotification('Please enter both quote text and category.', '#ffc107');
+  }
+}
