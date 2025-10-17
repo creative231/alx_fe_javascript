@@ -1,76 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dynamic Quote Generator</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dynamic Quote Generator — Persistence & JSON</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f9f9f9;
-      padding: 30px;
+      font-family: "Source Sans Pro", Arial, sans-serif;
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 16px;
+      color: #222;
+      background: #f7f7f7;
     }
 
     h1 {
-      color: #333;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    #controls {
+      text-align: center;
+      margin-bottom: 16px;
     }
 
     #quoteDisplay {
-      margin: 20px auto;
-      padding: 20px;
-      max-width: 600px;
+      min-height: 80px;
+      padding: 18px;
       background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 12px;
       font-style: italic;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    button {
-      padding: 10px 15px;
-      margin: 5px;
-      border: none;
-      background: #0078d7;
-      color: white;
-      border-radius: 5px;
+    .row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    button, select, input[type="file"] {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #fff;
       cursor: pointer;
     }
 
-    button:hover {
-      background: #005fa3;
-    }
+    button:hover { opacity: 0.9; } /* button hover/active: opacity 0.9 */
 
-    input {
-      padding: 8px;
-      margin: 5px;
-      width: 200px;
-    }
-
-    select {
-      padding: 8px;
-      margin: 5px;
-    }
+    a { color: #007bff; text-decoration: none; }
+    a:hover, a:active { color: #FF6565; } /* links hover/active: #FF6565 */
 
     .form-section {
-      margin-top: 30px;
       background: #fff;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      display: inline-block;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+    }
+
+    label { display:block; margin:6px 0 4px; font-weight:600; }
+
+    input[type="text"] {
+      width: 260px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    @media (max-width:480px) {
+      body { margin: 16px auto; padding: 0 10px; }
+      input[type="text"] { width: 100%; box-sizing: border-box; }
+      #quoteDisplay { font-size: 0.95rem; padding: 14px; }
     }
   </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
 
-  <div id="quoteDisplay">Your quote will appear here...</div>
-  <div>
-    <label for="categoryFilter">Select Category: </label>
+  <div id="quoteDisplay">Click "Show New Quote" to begin.</div>
+
+  <div id="controls" class="row">
     <select id="categoryFilter">
-      <option value="all">All</option>
+      <option value="all">All Categories</option>
     </select>
+
     <button id="newQuote">Show New Quote</button>
+
+    <button id="exportJsonBtn">Export Quotes (JSON)</button>
+
+    <!-- Import file input -->
+    <input type="file" id="importFile" accept=".json" />
   </div>
 
   <div class="form-section" id="addQuoteSection"></div>
