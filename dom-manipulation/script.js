@@ -1,10 +1,10 @@
 // -------------------
 // Mock server URL
-const SERVER_URL = "https://jsonplaceholder.typicode.com/posts"; // Mock API
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
 
 // -------------------
-// Local quotes array
-let localQuotes = [
+// Load localQuotes from localStorage or use default
+let localQuotes = JSON.parse(localStorage.getItem("localQuotes")) || [
   { text: "The best way to get started is to quit talking and begin doing.", category: "Motivation" },
   { text: "Life is what happens when you're busy making other plans.", category: "Life" },
   { text: "Don't wait. The time will never be just right.", category: "Motivation" },
@@ -16,6 +16,34 @@ let localQuotes = [
 const quoteDisplay = document.getElementById('quoteDisplay');
 const newQuoteBtn = document.getElementById('newQuote');
 const categorySelect = document.getElementById('categorySelect');
+
+// Create notification banner
+const notificationBanner = document.createElement('div');
+notificationBanner.style.position = "fixed";
+notificationBanner.style.top = "0";
+notificationBanner.style.left = "0";
+notificationBanner.style.width = "100%";
+notificationBanner.style.padding = "10px";
+notificationBanner.style.textAlign = "center";
+notificationBanner.style.backgroundColor = "#fffa90";
+notificationBanner.style.display = "none";
+document.body.prepend(notificationBanner);
+
+// -------------------
+// Helper: show notification
+function showNotification(message) {
+  notificationBanner.textContent = message;
+  notificationBanner.style.display = "block";
+  setTimeout(() => {
+    notificationBanner.style.display = "none";
+  }, 4000);
+}
+
+// -------------------
+// Save localQuotes to localStorage
+function saveToLocalStorage() {
+  localStorage.setItem("localQuotes", JSON.stringify(localQuotes));
+}
 
 // -------------------
 // Populate categories dropdown
@@ -44,7 +72,7 @@ function showRandomQuote() {
 }
 
 // -------------------
-// Dynamically create add quote form
+// Create dynamic add-quote form
 function createAddQuoteForm() {
   const formContainer = document.createElement('div');
 
@@ -74,21 +102,21 @@ function createAddQuoteForm() {
 }
 
 // -------------------
-// Add quote to local storage and optionally post to server
+// Add quote locally and post to server
 function addQuote(text, category) {
   text = text.trim();
   category = category.trim();
   if (!text || !category) {
-    alert('Please enter both quote and category.');
+    showNotification('Please enter both quote and category.');
     return;
   }
 
   const newQuote = { text, category };
   localQuotes.push(newQuote);
+  saveToLocalStorage(); // Update localStorage
   populateCategories();
-  alert('Quote added successfully!');
+  showNotification('Quote added successfully!');
 
-  // Post the new quote to the server
   postQuoteToServer(newQuote);
 }
 
@@ -99,13 +127,10 @@ async function fetchQuotesFromServer() {
     const response = await fetch(SERVER_URL);
     const serverData = await response.json();
 
-    // Map first 10 posts to quotes for simulation
-    const serverQuotes = serverData.slice(0, 10).map(post => ({
+    return serverData.slice(0, 10).map(post => ({
       text: post.title,
       category: "Server"
     }));
-
-    return serverQuotes;
   } catch (error) {
     console.error("Error fetching server data:", error);
     return [];
@@ -113,35 +138,34 @@ async function fetchQuotesFromServer() {
 }
 
 // -------------------
-// Post a quote to the server (mock)
+// Post a quote to server (mock)
 async function postQuoteToServer(quote) {
   try {
-    const response = await fetch(SERVER_URL, {
+    await fetch(SERVER_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(quote)
     });
-    const data = await response.json();
-    console.log("Quote synced to server:", data);
   } catch (error) {
     console.error("Error posting quote:", error);
   }
 }
 
 // -------------------
-// Sync local quotes with server
+// Sync quotes with server and handle conflicts
 async function syncQuotes() {
   const serverQuotes = await fetchQuotesFromServer();
 
-  // Conflict resolution: server data takes precedence if not already in local
+  // Conflict resolution: server takes precedence if not in localQuotes
   const newServerQuotes = serverQuotes.filter(sq =>
     !localQuotes.some(lq => lq.text === sq.text && lq.category === sq.category)
   );
 
   if (newServerQuotes.length > 0) {
     localQuotes = [...localQuotes, ...newServerQuotes];
+    saveToLocalStorage(); // Update localStorage
     populateCategories();
-    alert(`${newServerQuotes.length} new quote(s) fetched from server and added.`);
+    showNotification(`${newServerQuotes.length} new quote(s) fetched from server and added.`);
   }
 }
 
@@ -155,5 +179,5 @@ createAddQuoteForm();
 newQuoteBtn.addEventListener('click', showRandomQuote);
 categorySelect.addEventListener('change', showRandomQuote);
 
-// Periodically check for new quotes from the server every 10 seconds
+// Periodically sync with server every 10 seconds
 setInterval(syncQuotes, 10000);
