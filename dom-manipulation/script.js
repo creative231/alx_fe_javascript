@@ -17,6 +17,7 @@ const quoteDisplay = document.getElementById('quoteDisplay');
 const newQuoteBtn = document.getElementById('newQuote');
 const categorySelect = document.getElementById('categorySelect');
 
+// -------------------
 // Create notification banner
 const notificationBanner = document.createElement('div');
 notificationBanner.style.position = "fixed";
@@ -127,6 +128,7 @@ async function fetchQuotesFromServer() {
     const response = await fetch(SERVER_URL);
     const serverData = await response.json();
 
+    // Map first 10 posts to quotes for simulation
     return serverData.slice(0, 10).map(post => ({
       text: post.title,
       category: "Server"
@@ -165,7 +167,12 @@ async function syncQuotes() {
     localQuotes = [...localQuotes, ...newServerQuotes];
     saveToLocalStorage(); // Update localStorage
     populateCategories();
+
+    // UI notifications
     showNotification(`${newServerQuotes.length} new quote(s) fetched from server and added.`);
+    
+    // Alert required by assignment
+    alert("Quotes synced with server!");
   }
 }
 
